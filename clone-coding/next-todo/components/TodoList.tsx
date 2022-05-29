@@ -1,9 +1,11 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import styled from "styled-components";
+import { useRouter } from "next/dist/client/router";
 import { TodoType } from "../types/todo";
 import palette from "../styles/palette";
 import TrashCanIcon from "../public/statics/svg/iconmonstr-trash-can-26.svg";
 import CheckMarkIcon from "../public/statics/svg/iconmonstr-check-mark-15.svg";
+import { checkTodoAPI, deleteTodoAPI } from "../lib/api/todo";
 
 interface IProps {
     todos: TodoType[];
@@ -128,9 +130,42 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
         [key: string]: number | undefined;
     };
 
+    const [localTodos, setLocalTodos] = useState(todos);
+    const router = useRouter();
+    const checkTodo = async (id: number) => {
+      try {
+        await checkTodoAPI(id);
+        console.log("체크하였습니다.");
+        // 체크적용방법1 (데이터 다시받기)
+        // router.reload();
+        // 체크적용방법2 (데이터 다시받기)
+        // router.push("/");
+        // 체크적용방법2 (데이터를 로컬로 저장하여 사용하기)
+        const newTodos = localTodos.map((todo) => {
+          if (todo.id === id) {
+            return { ...todo, checked: !todo.checked };
+          }
+          return todo;
+        });
+        setLocalTodos(newTodos);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    const deleteTodo = async (id:number) => {
+      try {
+        await deleteTodoAPI(id);
+        const newTodos = localTodos.filter((todo) => todo.id !== id);
+        setLocalTodos(newTodos);
+        console.log("삭제했습니다.");
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
     const getTodoColorNums = useCallback(() => {
       const colors: ObjectIndexType = {};
-      todos.forEach((todo) => {
+      localTodos.forEach((todo) => {
         const value = colors[todo.color];
         if (!value) {
           colors[`${todo.color}`] = 1;
@@ -142,13 +177,11 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
     }, [todos]);
     const todoColorNums = useMemo(getTodoColorNums, [todos]);
 
-    console.log(todoColorNums);
-
     return (
       <Container>
         <div className="todo-list-header">
           <p className="todo-list-last-todo">
-            남은 TODO<span>{todos.length}개</span>
+            남은 TODO<span>{localTodos.length}개</span>
           </p>
           <div className="todo-list-header-colors">
             {Object.keys(todoColorNums).map((color, index) => (
@@ -160,7 +193,7 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
           </div>
         </div>
         <ul className="todo-list">
-          {todos.map((todo) => (
+          {localTodos.map((todo) => (
             <li className="todo-item" key={todo.id}>
               <div className="todo-left-side">
                 <div className={`todo-color-block bg-${todo.color}`} />
@@ -171,12 +204,12 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
               <div className="todo-right-side">
                 {todo.checked && (
                   <>
-                    <TrashCanIcon className="todo-trash-can" onClick={() => {}} />
-                    <CheckMarkIcon className="todo-=check-mark" onClick={() => {}} />
+                    <TrashCanIcon className="todo-trash-can" onClick={() => { deleteTodo(todo.id); }} />
+                    <CheckMarkIcon className="todo-check-mark" onClick={() => { checkTodo(todo.id); }} />
                   </>
                 )}
                 {!todo.checked && (
-                <button type="button" className="todo-button" onClick={() => {}} />
+                <button type="button" className="todo-button" onClick={() => { checkTodo(todo.id); }} />
                 )}
               </div>
             </li>
