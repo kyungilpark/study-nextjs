@@ -1,11 +1,16 @@
 import React, { useMemo, useCallback, useState } from "react";
 import styled from "styled-components";
 import { useRouter } from "next/dist/client/router";
+// import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { TodoType } from "../types/todo";
 import palette from "../styles/palette";
 import TrashCanIcon from "../public/statics/svg/iconmonstr-trash-can-26.svg";
 import CheckMarkIcon from "../public/statics/svg/iconmonstr-check-mark-15.svg";
 import { checkTodoAPI, deleteTodoAPI } from "../lib/api/todo";
+// import { RootState } from "../store";
+import { useSelector } from "../store";
+import { todoActions } from "../store/todo";
 
 interface IProps {
     todos: TodoType[];
@@ -125,29 +130,40 @@ const Container = styled.div`
   }
 `;
 
-const TodoList: React.FC<IProps> = ({ todos }) => {
+const TodoList: React.FC<IProps> = () => {
+  // const todos = useSelector((state: RootState) => state.todo.todos);
+  const todos = useSelector((state) => state.todo.todos);
+  const dispatch = useDispatch();
+
     type ObjectIndexType = {
         [key: string]: number | undefined;
     };
 
-    const [localTodos, setLocalTodos] = useState(todos);
+    // const [localTodos, setLocalTodos] = useState(todos);
     const router = useRouter();
     const checkTodo = async (id: number) => {
       try {
         await checkTodoAPI(id);
-        console.log("체크하였습니다.");
         // 체크적용방법1 (데이터 다시받기)
         // router.reload();
         // 체크적용방법2 (데이터 다시받기)
         // router.push("/");
         // 체크적용방법2 (데이터를 로컬로 저장하여 사용하기)
-        const newTodos = localTodos.map((todo) => {
+        // const newTodos = localTodos.map((todo) => {
+        //   if (todo.id === id) {
+        //     return { ...todo, checked: !todo.checked };
+        //   }
+        //   return todo;
+        // });
+        // setLocalTodos(newTodos);
+        const newTodos = todos.map((todo) => {
           if (todo.id === id) {
             return { ...todo, checked: !todo.checked };
           }
           return todo;
         });
-        setLocalTodos(newTodos);
+        dispatch(todoActions.setTodo(newTodos));
+        console.log("체크하였습니다.");
       } catch (e) {
         console.log(e);
       }
@@ -155,8 +171,10 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
     const deleteTodo = async (id:number) => {
       try {
         await deleteTodoAPI(id);
-        const newTodos = localTodos.filter((todo) => todo.id !== id);
-        setLocalTodos(newTodos);
+        // const newTodos = localTodos.filter((todo) => todo.id !== id);
+        // setLocalTodos(newTodos);
+        const newTodos = todos.filter((todo) => todo.id !== id);
+        dispatch(todoActions.setTodo(newTodos));
         console.log("삭제했습니다.");
       } catch (e) {
         console.log(e);
@@ -165,7 +183,7 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
 
     const getTodoColorNums = useCallback(() => {
       const colors: ObjectIndexType = {};
-      localTodos.forEach((todo) => {
+      todos.forEach((todo) => {
         const value = colors[todo.color];
         if (!value) {
           colors[`${todo.color}`] = 1;
@@ -181,7 +199,7 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
       <Container>
         <div className="todo-list-header">
           <p className="todo-list-last-todo">
-            남은 TODO<span>{localTodos.length}개</span>
+            남은 TODO<span>{todos.length}개</span>
           </p>
           <div className="todo-list-header-colors">
             {Object.keys(todoColorNums).map((color, index) => (
@@ -193,7 +211,7 @@ const TodoList: React.FC<IProps> = ({ todos }) => {
           </div>
         </div>
         <ul className="todo-list">
-          {localTodos.map((todo) => (
+          {todos.map((todo) => (
             <li className="todo-item" key={todo.id}>
               <div className="todo-left-side">
                 <div className={`todo-color-block bg-${todo.color}`} />
