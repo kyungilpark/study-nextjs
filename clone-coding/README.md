@@ -88,6 +88,12 @@ $ yarn add @reduxjs/toolkit
 
 ### 8.1 프로젝트 생성하기
 
+## 9장. 공통 헤더 만들기
+
+### 9.2 모달 컴포넌트 만들기
+
+#### 9.2.1 리액트 포털
+- https://reactjs.org/docs/portals.html
 
 ## 참고
 - Isomorphic Unfetch 를 사용하는 이유
