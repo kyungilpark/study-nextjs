@@ -62,6 +62,7 @@ module.exports = {
         tsx: "never",
       }, //import 시 확장자명은 사용하지 않는다.
     ],
+    "react/require-default-props": "warn"
   },
   settings: {
     "import/resolver": {
