@@ -83,7 +83,10 @@ $ yarn add @reduxjs/toolkit
 
 ### 7.5 useSelector 사용하기
 
+## 8장. 넥스트 비앤비 프로젝트 설정하기
+- 피그마: https://bit.ly/3oUUIWW
 
+### 8.1 프로젝트 생성하기
 
 
 ## 참고
