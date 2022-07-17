@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { useDispatch } from "react-redux";
 import CloseXIcon from "../../public/static/svg/modal/modal_close_x_icon.svg";
 import MailIcon from "../../public/static/svg/auth/mail.svg";
 import PersonIcon from "../../public/static/svg/auth/person.svg";
@@ -11,6 +12,7 @@ import palette from "../../styles/palette";
 import Selector from "../common/Selector";
 import Button from "../common/Button";
 import { signupAPI } from "../../lib/api/auth";
+import { userActions } from "../../store/user";
 
 const Container = styled.form`
   width: 568px;
@@ -74,6 +76,7 @@ const SignUpModal: React.FC = () => {
     const [birthYear, setBirthYear] = useState<string | undefined>();
     const [birthDay, setBirthDay] = useState<string | undefined>();
     const [birthMonth, setBirthMonth] = useState<string | undefined>();
+    const dispatch = useDispatch();
 
     const onChangeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
@@ -123,7 +126,9 @@ const SignUpModal: React.FC = () => {
                     `${birthYear}-${birthMonth!.replace("월", "")}-${birthDay}`
                 ).toISOString()
             };
-            await signupAPI(signUpBody);
+            const { data } = await signupAPI(signUpBody);
+
+            dispatch(userActions.setLoggedUser(data));
         } catch (e) {
             console.log(e);
         }
