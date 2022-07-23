@@ -51,3 +51,85 @@ https://nextjs.org/docs
 - `getInitialProps` 는 API에서 가져와야 하며 node.js 라이브러리나 파일 시스템을 사용할 수 없습니다.
 
 가능하면 `getInitialProps` 보다 `getStaticProps` 로 마이그레이션하는 것을 권장합니다.
+
+## Absolute Imports and Module path aliases
+- https://github.com/vercel/next.js/tree/canary/examples/with-absolute-imports
+
+Next.js 는 자동으로 `tsconfig.json` 및 `jsconfig.json` 에서 `"paths"` 및 `"baseUrl"` 옵션을 지원합니다.
+
+> Note: jsconfig.json can be used when you don't use TypeScript
+
+> Note: tsconfig.json / jsconfig.json 변경사항 반영을 위해선 서버를 재시작해야 합니다.
+
+이러한 옵션을 사용하면 모듈 별칭을 구성할 수 있습니다. 예를 들어, 일반적인 패턴은 특정 디렉터리에 절대 경로를 사용하도록 별칭을 지정하는 것입니다.
+
+이러한 옵션의 유용한 기능 중 하나는 vscode와 같은 특정 편집기에 자동으로 통합된다는 것입니다.
+
+baseUrl 구성 옵션을 사용하면 프로젝트의 루트에서 직접 가져올 수 있습니다.
+
+```json
+// tsconfig.json or jsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": "."
+  }
+}
+```
+
+```js
+// components/button.js
+export default function Button() {
+  return <button>Click me</button>
+}
+```
+
+```js
+// pages/index.js
+import Button from 'components/button'
+
+export default function HomePage() {
+  return (
+    <>
+      <h1>Hello World</h1>
+      <Button />
+    </>
+  )
+}
+```
+
+`baseUrl` 이 유용하지만 1 대 1과 일치하지 않는 다른 별칭을 추가할 수도 있습니다. 이 TypeScript 에는 `"paths"` 옵션이 있습니다.
+
+`"paths"` 를 사용하면 모듈 별칭을 구성할 수 있습니다. 예를 들어 `@/components/*` to `components/*` 와 같습니다.
+
+```json
+// tsconfig.json or jsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": ["components/*"]
+    }
+  }
+}
+```
+
+```js
+// components/button.js
+export default function Button() {
+  return <button>Click me</button>
+}
+```
+
+```js
+// pages/index.js
+import Button from '@/components/button'
+
+export default function HomePage() {
+  return (
+    <>
+      <h1>Hello World</h1>
+      <Button />
+    </>
+  )
+}
+```
